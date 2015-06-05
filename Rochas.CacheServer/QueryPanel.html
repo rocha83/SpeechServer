@@ -1,0 +1,150 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>Bayer Cache Service Demo</title>
+    <script type="text/javascript" src="Scripts/speech-engine.js"></script>
+</head>
+<body>
+    <div style="margin-left: 2%; margin-top: 2%">
+        <form id="frmSendModel" method="post" enctype="multipart/form-data" action="QueryPanel.html">
+            <label for="fileUploadAsm">Give me your .Net model lib :</label><br />
+            <input id="fileUploadAsm" type="file" />
+            <br /><br />
+            <label for="fileUploadData">Give me the datasource to work (Json/XML).</label><br />
+            <input id="fileUploadData" type="file" />
+            <br /><br />
+            <label for="txtModelName">Give me the model name to work.</label><br />
+            <input id="txtModelName" type="text" style="width: 16%" />
+            <br />
+            <input type="checkbox" id="chkReplaceInstance" value="Replace Instance" />
+            <label for="chkReplaceInstance">Replace&nbsp;Instance</label>
+            <br /><br />
+            <label for="txtApiUri">Give me the api uri/filter and Send !  ;-)</label><br />
+            <input id="txtApiUri" type="text" style="width: 35%"  />
+            <br /><br />
+            <input type="button" value="Init" onclick="dataSubmit(); this.disabled = 'disabled';" />
+            &nbsp;&nbsp;&nbsp;
+            <input type="button" id="btnSend" value="Send" onclick="querySubmit()"  /><br />
+            <br />
+            New feature : Click the rec button, after click on query<br />
+            <br />
+            &nbsp;<input type="button" value="Rec" onclick="speechRec(); if (this.value == 'Rec') { this.value = 'Stop' } else { this.value = 'Rec' };" />&nbsp;&nbsp;
+            <input type="button" value="Query" onclick="speechQuerySubmit();" /></form>
+    </div>
+</body>
+<script type="text/javascript">
+
+    var fileAsm = undefined;
+    var fileData = undefined;
+    var audioRec = false;
+
+    function getFileAsm(evt) {
+
+        fileAsm = evt.target.files[0];
+    }
+
+    function getFileData(evt) {
+
+        fileData = evt.target.files[0];
+    }
+
+    function dataSubmit(evt) {
+
+        if (fileAsm == undefined)
+            return alert("Please select a .net model library to upload");
+
+        if (fileData == undefined)
+            return alert("Please select a datasource file to upload");
+
+        var formData = new FormData();
+
+        formData.append("modelLib", fileAsm);
+        formData.append("datasource", fileData);
+        formData.append("modelName", document.getElementById("txtModelName").value);
+        formData.append("replaceInstance", document.getElementById("chkReplaceInstance").value);
+
+        var request = new XMLHttpRequest();
+        request.open("POST", "api/config");
+        var response = request.send(formData);
+
+        request.onreadystatechange = function () {
+            if (request.readyState == 4 && request.status == 200)
+				alert(request.responseText);
+        }
+
+        document.getElementById("fileUploadAsm").disabled = "disabled";
+        document.getElementById("fileUploadData").disabled = "disabled";
+        document.getElementById("txtModelName").disabled = "disabled";
+
+        document.getElementById("txtApiUri").disabled = false;
+        document.getElementById("btnSend").disabled = false;
+
+        document.getElementById("txtApiUri").focus();
+    }
+
+    function querySubmit() {
+
+        var repetitions = prompt("How many requests do you like to dispatch (max. 100) ?");
+
+        if (repetitions == undefined) repetitions = 1;
+
+        var queryUri = document.getElementById("txtApiUri").value;
+
+        if (queryUri.trim() == '')
+            return alert("Please inform the api uri/filter expression");
+
+        alert("Open the browser console to see results.");
+
+        for (cont = 1; cont <= parseInt(repetitions) ; cont++) {
+
+            if (repetitions == 1)
+                window.open(queryUri);
+            else {
+
+                if (repetitions > 100) repetitions = 100;
+
+                console.log("Starting the " + cont.toString() + "o. test worker...");
+                var request = new Worker(queryUri);
+                request.postMessage(null);
+            }
+        }
+    }
+
+    function speechRec() {
+
+        audioRec = !audioRec;
+
+        if (audioRec)
+            window.speech_engine.start();
+        else
+            window.speech_engine.stop();
+    }
+
+    function speechQuerySubmit() {
+
+        var formData = new FormData();
+
+        var audioByteArray = window.speech_engine.getAudioBytes();
+
+        formData.append("audioBuffer", audioByteArray);
+
+        var request = new XMLHttpRequest();
+        request.open("POST", "api/speechquery");
+        var response = request.send(formData);
+
+        request.onreadystatechange = function () {
+            if (request.readyState == 4 && request.status == 200)
+                if (request.responseText.trim() != '""')
+                    window.open(request.responseText.replace('"', '').replace('"', ''));
+                else
+                    alert("Can't recognize anything, please try again.");
+
+            setTimeout(function() { location.reload() }, 1);
+        }
+    }
+
+    document.getElementById('fileUploadAsm').addEventListener('change', getFileAsm, false);
+    document.getElementById('fileUploadData').addEventListener('change', getFileData, false);
+
+</script>
+</html>
