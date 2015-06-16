@@ -613,7 +613,7 @@ namespace Rochas.CacheServer
                 List<object> result = new List<object>();
 
                 foreach (var cacheItem in cacheItems.Values)
-                    result.Add(cacheItem.Where(cci => foundedKeys.ContainsKey(cci.Key)).Select(cci => cci.Value));
+                    result.AddRange(cacheItem.Where(cci => foundedKeys.ContainsKey(cci.Key)).Select(cci => cci.Value));
 
                 return result;
             }

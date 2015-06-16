@@ -133,7 +133,7 @@ window.speech_engine.getAudioBytes =
         return result;
     };
 
-window.speech_engine.start = function () {
+window.speech_engine.start = function (stopSecounds) {
 
     var leftchannel = [];
     var rightchannel = [];
@@ -148,6 +148,11 @@ window.speech_engine.start = function () {
     recording = true;
 
     window.speech_engine.init();
+
+    if (stopSecounds > 0) {
+        window.setTimeout(function () { window.speech_engine.stop(); }, (stopSecounds * 1000));
+
+    }
 }
 
 window.speech_engine.stop = function () {
