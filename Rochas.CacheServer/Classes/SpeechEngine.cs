@@ -62,10 +62,14 @@ namespace Rochas.CacheServer
             {
                 string dumpPath = ConfigurationManager.AppSettings["DumpPath"];
                 string soxPath = ConfigurationManager.AppSettings["SoxPath"];
-                string soxArgs = ConfigurationManager.AppSettings["SoxArgs"];
+                string soxNPrepArgs = ConfigurationManager.AppSettings["SoxNPrepArgs"];
+                string soxNRedArgs = ConfigurationManager.AppSettings["SoxNRedArgs"];
+                string soxSplitArgs = ConfigurationManager.AppSettings["SoxSplitArgs"];
 
                 string soxCmd = string.Concat(soxPath, "\\sox.exe");
-                soxArgs = string.Format(soxArgs, callGuid);
+                soxSplitArgs = string.Format(soxSplitArgs, callGuid);
+                soxNPrepArgs = string.Format(soxSplitArgs, callGuid);
+                soxNRedArgs = string.Format(soxSplitArgs, callGuid);
 
                 if ((dumpPath != null) && (soxPath != null))
                 {
@@ -78,7 +82,12 @@ namespace Rochas.CacheServer
                     wavFileStream.Close();
                     wavFileStream.Dispose();
 
-                    Process.Start(soxCmd, soxArgs);
+                    Process.Start(soxCmd, soxNPrepArgs);
+                    Thread.Sleep(200);
+                    Process.Start(soxCmd, soxNRedArgs);
+                    Thread.Sleep(200);
+                    Process.Start(soxCmd, soxSplitArgs);
+                    Thread.Sleep(200);
                 }
             }
             catch (Exception ex)
@@ -90,8 +99,6 @@ namespace Rochas.CacheServer
         public static string[] RecognizeSentence()
         {
             List<string> result = new List<string>(); ;
-
-            Thread.Sleep(200);
 
             try
             {
