@@ -62,14 +62,12 @@ namespace Rochas.CacheServer
             {
                 string dumpPath = ConfigurationManager.AppSettings["DumpPath"];
                 string soxPath = ConfigurationManager.AppSettings["SoxPath"];
-                string soxNPrepArgs = ConfigurationManager.AppSettings["SoxNPrepArgs"];
-                string soxNRedArgs = ConfigurationManager.AppSettings["SoxNRedArgs"];
+                string soxCpndArgs = ConfigurationManager.AppSettings["SoxCpndArgs"];
                 string soxSplitArgs = ConfigurationManager.AppSettings["SoxSplitArgs"];
 
                 string soxCmd = string.Concat(soxPath, "\\sox.exe");
+                soxCpndArgs = string.Format(soxCpndArgs, callGuid);
                 soxSplitArgs = string.Format(soxSplitArgs, callGuid);
-                soxNPrepArgs = string.Format(soxSplitArgs, callGuid);
-                soxNRedArgs = string.Format(soxSplitArgs, callGuid);
 
                 if ((dumpPath != null) && (soxPath != null))
                 {
@@ -82,9 +80,7 @@ namespace Rochas.CacheServer
                     wavFileStream.Close();
                     wavFileStream.Dispose();
 
-                    Process.Start(soxCmd, soxNPrepArgs);
-                    Thread.Sleep(200);
-                    Process.Start(soxCmd, soxNRedArgs);
+                    Process.Start(soxCmd, soxCpndArgs);
                     Thread.Sleep(200);
                     Process.Start(soxCmd, soxSplitArgs);
                     Thread.Sleep(200);
@@ -122,6 +118,10 @@ namespace Rochas.CacheServer
                 foreach (var wordFile in wordFiles)
                     if (File.Exists(string.Concat(wordFile)))
                         File.Delete(string.Concat(wordFile));
+
+                string srcClndAudioPath = string.Concat(dumpPath, string.Format("\\cleanedaudio{0}.wav", callGuid));
+                if (File.Exists(srcClndAudioPath))
+                    File.Delete(srcClndAudioPath);
 
                 string srcAudioPath = string.Concat(dumpPath, string.Format("\\audiobuffer{0}.wav", callGuid));
                 if (File.Exists(srcAudioPath))
