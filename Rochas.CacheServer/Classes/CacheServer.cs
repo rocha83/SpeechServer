@@ -232,6 +232,7 @@ namespace Rochas.CacheServer
 
                     if (!string.IsNullOrEmpty(className))
                     {
+                        className = className.ToLower();
                         asmDump = asmBufferInstances[className];
                         contentDump = JsonConvert.SerializeObject(cacheItems[className]);
                         numericIndexDump = JsonConvert.SerializeObject(numericCacheIndex[className]);
@@ -299,11 +300,11 @@ namespace Rochas.CacheServer
 
                     if (!string.IsNullOrEmpty(className))
                     {
-                        if (asmBufferInstances[className] == null)
+                        if (!asmBufferInstances.ContainsKey(className))
                             asmBufferInstances.Add(className, null);
                         asmBufferInstances[className] = asmRawFormat;
 
-                        if (cacheItems[className] == null)
+                        if (!cacheItems.ContainsKey(className))
                             cacheItems.Add(className, null);
                         cacheItems[className] = JsonConvert.DeserializeObject<ConcurrentDictionary<long, object>>(contentDump);
 
