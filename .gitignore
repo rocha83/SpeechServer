@@ -41,3 +41,8 @@ $RECYCLE.BIN/
 Network Trash Folder
 Temporary Items
 .apdisk
+/Rochas.CacheServer/bin
+/Rochas.CacheServer/obj
+/.vs/config
+/.vs/Rochas.CacheServer/v14
+\packages

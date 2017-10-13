@@ -42,8 +42,8 @@ namespace Rochas.CacheServer
             spcEngine = new SpeechRecognitionEngine(new CultureInfo(culture));
 
             Choices realObjects = new Choices();
-            realObjects.Add(grammarChoices.Take(12000).ToArray());
-            //new string[] { "copo", "panela", "veiculo", "imovel", "setor", "andar" }
+            realObjects.Add(grammarChoices.Take(13000).ToArray());
+            //realObjects.Add(new string[] { "mesa", "cadeira", "copo", "panela", "veiculo", "predio", "andar", "setor", "tatiana", "maria", "renato", "computador" });
 
             GrammarBuilder grammarBuilder = new GrammarBuilder();
             grammarBuilder.Culture = new CultureInfo(culture);
@@ -51,7 +51,14 @@ namespace Rochas.CacheServer
 
             grammar = new Grammar(grammarBuilder);
 
-            spcEngine.LoadGrammar(grammar);
+            try
+            {
+                spcEngine.LoadGrammar(grammar);
+            }
+            catch(Exception ex)
+            {
+                throw ex;
+            }
         }
 
         public static void SplitAudioWords(Stream audioBuffer)
@@ -62,10 +69,12 @@ namespace Rochas.CacheServer
             {
                 string dumpPath = ConfigurationManager.AppSettings["DumpPath"];
                 string soxPath = ConfigurationManager.AppSettings["SoxPath"];
+                //string soxNoiseRdArgs = ConfigurationManager.AppSettings["SoxNoiseRdArgs"];
                 string soxCpndArgs = ConfigurationManager.AppSettings["SoxCpndArgs"];
                 string soxSplitArgs = ConfigurationManager.AppSettings["SoxSplitArgs"];
 
                 string soxCmd = string.Concat(soxPath, "\\sox.exe");
+                //soxNoiseRdArgs = string.Format(soxNoiseRdArgs, callGuid, soxPath);
                 soxCpndArgs = string.Format(soxCpndArgs, callGuid);
                 soxSplitArgs = string.Format(soxSplitArgs, callGuid);
 
@@ -80,6 +89,8 @@ namespace Rochas.CacheServer
                     wavFileStream.Close();
                     wavFileStream.Dispose();
 
+                    //Process.Start(soxCmd, soxNoiseRdArgs);
+                    //Thread.Sleep(300);
                     Process.Start(soxCmd, soxCpndArgs);
                     Thread.Sleep(200);
                     Process.Start(soxCmd, soxSplitArgs);
@@ -118,6 +129,10 @@ namespace Rochas.CacheServer
                 foreach (var wordFile in wordFiles)
                     if (File.Exists(string.Concat(wordFile)))
                         File.Delete(string.Concat(wordFile));
+
+                string srcCmpndAudioPath = string.Concat(dumpPath, string.Format("\\companedaudio{0}.wav", callGuid));
+                if (File.Exists(srcCmpndAudioPath))
+                    File.Delete(srcCmpndAudioPath);
 
                 string srcClndAudioPath = string.Concat(dumpPath, string.Format("\\cleanedaudio{0}.wav", callGuid));
                 if (File.Exists(srcClndAudioPath))

@@ -181,7 +181,7 @@ namespace Rochas.CacheServer
                 foreach (var dataItem in (IEnumerable)dataSourceInstance)
                 {
                     // Identificador do objeto no dicionário cache
-                    long itemId = dataItem.GetHashCode();
+                    int itemId = dataItem.GetHashCode();
 
                     // Adiciona ou atualiza objeto no dicionário cache
                     //if (cacheItems[className].ContaisKey(itemId))
